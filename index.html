@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ఆవర్తన పట్టిక / Periodic Table</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 10px;
+            color: #333;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #0056b3;
+            margin: 0;
+            font-size: 1.5em;
+        }
+        #lang-toggle {
+            padding: 8px 12px;
+            font-size: 0.9em;
+            border: 1px solid #0056b3;
+            background-color: #f8f9fa;
+            color: #0056b3;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #lang-toggle:hover {
+            background-color: #0056b3;
+            color: #ffffff;
+        }
+        .selection-box {
+            margin-bottom: 15px;
+        }
+        .selection-box label {
+            font-size: 1em;
+            margin-bottom: 8px;
+            display: block;
+            text-align: center;
+        }
+        #element-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        #element-details {
+            border: 1px solid #007bff;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            flex-grow: 1;
+        }
+        #element-details h2 {
+            margin: 0 0 15px 0;
+            text-align: center;
+            color: #d93025;
+            font-size: 1.4em;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.95em;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-item span:first-child {
+            font-weight: bold;
+        }
+        footer {
+            text-align: center;
+            padding-top: 20px;
+            font-size: 0.8em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1 id="main-title">🧪 ఆవర్తన పట్టిక</h1>
+            <button id="lang-toggle" onclick="toggleLanguage()">Switch to English</button>
+        </div>
+        <div class="selection-box">
+            <label id="select-label" for="element-select">ఒక మూలకాన్ని ఎంచుకోండి</label>
+            <select id="element-select" onchange="displayElementDetails()"></select>
+        </div>
+        <div id="element-details">
+            </div>
+        <footer>
+            A Muninder Raju SA Maths<br>GHS Eidgaon, Nirmal
+        </footer>
+    </div>
+
+    <script>
+        let currentLanguage = 'te'; // 'te' for Telugu, 'en' for English
+
+        const elementsDataTe = [
+            { num: 1, name: 'హైడ్రోజన్', symbol: 'H', mass: 1.008, config: '1', valency: '1' },
+            { num: 2, name: 'హీలియం', symbol: 'He', mass: 4.0026, config: '2', valency: '0' },
+            { num: 3, name: 'లిథియం', symbol: 'Li', mass: 6.94, config: '2, 1', valency: '1' },
+            { num: 4, name: 'బెరీలియం', symbol: 'Be', mass: 9.0122, config: '2, 2', valency: '2' },
+            { num: 5, name: 'బోరాన్', symbol: 'B', mass: 10.81, config: '2, 3', valency: '3' },
+            { num: 6, name: 'కార్బన్', symbol: 'C', mass: 12.011, config: '2, 4', valency: '4' },
+            { num: 7, name: 'నైట్రోజన్', symbol: 'N', mass: 14.007, config: '2, 5', valency: '3' },
+            { num: 8, name: 'ఆక్సిజన్', symbol: 'O', mass: 15.999, config: '2, 6', valency: '2' },
+            { num: 9, name: 'ఫ్లోరిన్', symbol: 'F', mass: 18.998, config: '2, 7', valency: '1' },
+            { num: 10, name: 'నియాన్', symbol: 'Ne', mass: 20.180, config: '2, 8', valency: '0' },
+            { num: 11, name: 'సోడియం', symbol: 'Na', mass: 22.990, config: '2, 8, 1', valency: '1' },
+            { num: 12, name: 'మెగ్నీషియం', symbol: 'Mg', mass: 24.305, config: '2, 8, 2', valency: '2' },
+            { num: 13, name: 'అల్యూమినియం', symbol: 'Al', mass: 26.982, config: '2, 8, 3', valency: '3' },
+            { num: 14, name: 'సిలికాన్', symbol: 'Si', mass: 28.085, config: '2, 8, 4', valency: '4' },
+            { num: 15, name: 'ఫాస్పరస్', symbol: 'P', mass: 30.974, config: '2, 8, 5', valency: '3, 5' },
+            { num: 16, name: 'సల్ఫర్', symbol: 'S', mass: 32.06, config: '2, 8, 6', valency: '2' },
+            { num: 17, name: 'క్లోరిన్', symbol: 'Cl', mass: 35.45, config: '2, 8, 7', valency: '1' },
+            { num: 18, name: 'ఆర్గాన్', symbol: 'Ar', mass: 39.948, config: '2, 8, 8', valency: '0' },
+            { num: 19, name: 'పొటాషియం', symbol: 'K', mass: 39.098, config: '2, 8, 8, 1', valency: '1' },
+            { num: 20, name: 'కాల్షియం', symbol: 'Ca', mass: 40.078, config: '2, 8, 8, 2', valency: '2' },
+            { num: 21, name: 'స్కాండియం', symbol: 'Sc', mass: 44.956, config: '2, 8, 9, 2', valency: '3' },
+            { num: 22, name: 'టైటానియం', symbol: 'Ti', mass: 47.867, config: '2, 8, 10, 2', valency: '4' },
+            { num: 23, name: 'వనాడియం', symbol: 'V', mass: 50.942, config: '2, 8, 11, 2', valency: '5' },
+            { num: 24, name: 'క్రోమియం', symbol: 'Cr', mass: 51.996, config: '2, 8, 13, 1', valency: '6' },
+            { num: 25, name: 'మాంగనీస్', symbol: 'Mn', mass: 54.938, config: '2, 8, 13, 2', valency: '7' },
+            { num: 26, name: 'ఇనుము', symbol: 'Fe', mass: 55.845, config: '2, 8, 14, 2', valency: '2, 3' },
+            { num: 27, name: 'కోబాల్ట్', symbol: 'Co', mass: 58.933, config: '2, 8, 15, 2', valency: '2, 3' },
+            { num: 28, name: 'నికెల్', symbol: 'Ni', mass: 58.693, config: '2, 8, 16, 2', valency: '2' },
+            { num: 29, name: 'రాగి', symbol: 'Cu', mass: 63.546, config: '2, 8, 18, 1', valency: '1, 2' },
+            { num: 30, name: 'జింక్', symbol: 'Zn', mass: 65.38, config: '2, 8, 18, 2', valency: '2' },
+            { num: 31, name: 'గాలియం', symbol: 'Ga', mass: 69.723, config: '2, 8, 18, 3', valency: '3' },
+            { num: 32, name: 'జర్మనియం', symbol: 'Ge', mass: 72.630, config: '2, 8, 18, 4', valency: '4' },
+            { num: 33, name: 'ఆర్సెనిక్', symbol: 'As', mass: 74.922, config: '2, 8, 18, 5', valency: '3, 5' },
+            { num: 34, name: 'సెలీనియం', symbol: 'Se', mass: 78.971, config: '2, 8, 18, 6', valency: '2' },
+            { num: 35, name: 'బ్రోమిన్', symbol: 'Br', mass: 79.904, config: '2, 8, 18, 7', valency: '1' },
+            { num: 36, name: 'క్రిప్టాన్', symbol: 'Kr', mass: 83.798, config: '2, 8, 18, 8', valency: '0' },
+            { num: 37, name: 'రుబిడియం', symbol: 'Rb', mass: 85.468, config: '2, 8, 18, 8, 1', valency: '1' },
+            { num: 38, name: 'స్ట్రాన్షియం', symbol: 'Sr', mass: 87.62, config: '2, 8, 18, 8, 2', valency: '2' },
+            { num: 39, name: 'ఇట్రియం', symbol: 'Y', mass: 88.906, config: '2, 8, 18, 9, 2', valency: '3' },
+            { num: 40, name: 'జిర్కోనియం', symbol: 'Zr', mass: 91.224, config: '2, 8, 18, 10, 2', valency: '4' },
+            { num: 41, name: 'నియోబియం', symbol: 'Nb', mass: 92.906, config: '2, 8, 18, 12, 1', valency: '5' },
+            { num: 42, name: 'మాలిబ్డినం', symbol: 'Mo', mass: 95.96, config: '2, 8, 18, 13, 1', valency: '6' },
+            { num: 43, name: 'టెక్నీషియం', symbol: 'Tc', mass: 98, config: '2, 8, 18, 13, 2', valency: '7' },
+            { num: 44, name: 'రుథేనియం', symbol: 'Ru', mass: 101.07, config: '2, 8, 18, 15, 1', valency: '8' },
+            { num: 45, name: 'రోడియం', symbol: 'Rh', mass: 102.91, config: '2, 8, 18, 16, 1', valency: '3' },
+            { num: 46, name: 'పల్లాడియం', symbol: 'Pd', mass: 106.42, config: '2, 8, 18, 18', valency: '2, 4' },
+            { num: 47, name: 'వెండి', symbol: 'Ag', mass: 107.87, config: '2, 8, 18, 18, 1', valency: '1' },
+            { num: 48, name: 'కాడ్మియం', symbol: 'Cd', mass: 112.41, config: '2, 8, 18, 18, 2', valency: '2' },
+            { num: 49, name: 'ఇండియం', symbol: 'In', mass: 114.82, config: '2, 8, 18, 18, 3', valency: '3' },
+            { num: 50, name: 'టిన్', symbol: 'Sn', mass: 118.71, config: '2, 8, 18, 18, 4', valency: '2, 4' },
+            { num: 51, name: 'ఆంటిమొనీ', symbol: 'Sb', mass: 121.76, config: '2, 8, 18, 18, 5', valency: '3, 5' },
+            { num: 52, name: 'టెల్లూరియం', symbol: 'Te', mass: 127.60, config: '2, 8, 18, 18, 6', valency: '2, 4, 6' },
+            { num: 53, name: 'అయోడిన్', symbol: 'I', mass: 126.90, config: '2, 8, 18, 18, 7', valency: '1, 3, 5, 7' },
+            { num: 54, name: 'జెనాన్', symbol: 'Xe', mass: 131.29, config: '2, 8, 18, 18, 8', valency: '0, 2, 4, 6, 8' },
+            { num: 55, name: 'సీసియం', symbol: 'Cs', mass: 132.91, config: '2, 8, 18, 18, 8, 1', valency: '1' },
+            { num: 56, name: 'బేరియం', symbol: 'Ba', mass: 137.33, config: '2, 8, 18, 18, 8, 2', valency: '2' },
+            { num: 57, name: 'లాంథనం', symbol: 'La', mass: 138.91, config: '2, 8, 18, 18, 9, 2', valency: '3' },
+            { num: 58, name: 'సీరియం', symbol: 'Ce', mass: 140.12, config: '2, 8, 18, 19, 9, 2', valency: '3, 4' },
+            { num: 59, name: 'ప్రాసియోడిమియం', symbol: 'Pr', mass: 140.91, config: '2, 8, 18, 21, 8, 2', valency: '3' },
+            { num: 60, name: 'నియోడిమియం', symbol: 'Nd', mass: 144.24, config: '2, 8, 18, 22, 8, 2', valency: '3' },
+            { num: 61, name: 'ప్రోమెథియం', symbol: 'Pm', mass: 145, config: '2, 8, 18, 23, 8, 2', valency: '3' },
+            { num: 62, name: 'సమారియం', symbol: 'Sm', mass: 150.36, config: '2, 8, 18, 24, 8, 2', valency: '3' },
+            { num: 63, name: 'యూరోపియం', symbol: 'Eu', mass: 151.96, config: '2, 8, 18, 25, 8, 2', valency: '2, 3' },
+            { num: 64, name: 'గడోలినియం', symbol: 'Gd', mass: 157.25, config: '2, 8, 18, 25, 9, 2', valency: '3' },
+            { num: 65, name: 'టర్బియం', symbol: 'Tb', mass: 158.93, config: '2, 8, 18, 27, 8, 2', valency: '3' },
+            { num: 66, name: 'డిస్ప్రోసియం', symbol: 'Dy', mass: 162.50, config: '2, 8, 18, 28, 8, 2', valency: '3' },
+            { num: 67, name: 'హోల్మియం', symbol: 'Ho', mass: 164.93, config: '2, 8, 18, 29, 8, 2', valency: '3' },
+            { num: 68, name: 'ఎర్బియం', symbol: 'Er', mass: 167.26, config: '2, 8, 18, 30, 8, 2', valency: '3' },
+            { num: 69, name: 'థూలియం', symbol: 'Tm', mass: 168.93, config: '2, 8, 18, 31, 8, 2', valency: '3' },
+            { num: 70, name: 'యిటర్బియం', symbol: 'Yb', mass: 173.05, config: '2, 8, 18, 32, 8, 2', valency: '2, 3' },
+            { num: 71, name: 'లుటీషియం', symbol: 'Lu', mass: 174.97, config: '2, 8, 18, 32, 9, 2', valency: '3' },
+            { num: 72, name: 'హాఫ్నియం', symbol: 'Hf', mass: 178.49, config: '2, 8, 18, 32, 10, 2', valency: '4' },
+            { num: 73, name: 'టాంటాలం', symbol: 'Ta', mass: 180.95, config: '2, 8, 18, 32, 11, 2', valency: '5' },
+            { num: 74, name: 'టంగ్‌స్టన్', symbol: 'W', mass: 183.84, config: '2, 8, 18, 32, 12, 2', valency: '6' },
+            { num: 75, name: 'రీనియం', symbol: 'Re', mass: 186.21, config: '2, 8, 18, 32, 13, 2', valency: '7' },
+            { num: 76, name: 'ఓస్మియం', symbol: 'Os', mass: 190.23, config: '2, 8, 18, 32, 14, 2', valency: '8' },
+            { num: 77, name: 'ఇరిడియం', symbol: 'Ir', mass: 192.22, config: '2, 8, 18, 32, 15, 2', valency: '3, 4' },
+            { num: 78, name: 'ప్లాటినం', symbol: 'Pt', mass: 195.08, config: '2, 8, 18, 32, 17, 1', valency: '2, 4' },
+            { num: 79, name: 'బంగారం', symbol: 'Au', mass: 196.97, config: '2, 8, 18, 32, 18, 1', valency: '1, 3' },
+            { num: 80, name: 'మెర్క్యురీ', symbol: 'Hg', mass: 200.59, config: '2, 8, 18, 32, 18, 2', valency: '1, 2' },
+            { num: 81, name: 'థాలియం', symbol: 'Tl', mass: 204.38, config: '2, 8, 18, 32, 18, 3', valency: '1, 3' },
+            { num: 82, name: 'సీసం', symbol: 'Pb', mass: 207.2, config: '2, 8, 18, 32, 18, 4', valency: '2, 4' },
+            { num: 83, name: 'బిస్మత్', symbol: 'Bi', mass: 208.98, config: '2, 8, 18, 32, 18, 5', valency: '3, 5' },
+            { num: 84, name: 'పొలోనియం', symbol: 'Po', mass: 209, config: '2, 8, 18, 32, 18, 6', valency: '2, 4, 6' },
+            { num: 85, name: 'ఆస్టాటిన్', symbol: 'At', mass: 210, config: '2, 8, 18, 32, 18, 7', valency: '1, 3, 5, 7' },
+            { num: 86, name: 'రేడాన్', symbol: 'Rn', mass: 222, config: '2, 8, 18, 32, 18, 8', valency: '0' },
+            { num: 87, name: 'ఫ్రాన్సియం', symbol: 'Fr', mass: 223, config: '2, 8, 18, 32, 18, 8, 1', valency: '1' },
+            { num: 88, name: 'రేడియం', symbol: 'Ra', mass: 226, config: '2, 8, 18, 32, 18, 8, 2', valency: '2' },
+            { num: 89, name: 'ఆక్టినియం', symbol: 'Ac', mass: 227, config: '2, 8, 18, 32, 18, 9, 2', valency: '3' },
+            { num: 90, name: 'థోరియం', symbol: 'Th', mass: 232.04, config: '2, 8, 18, 32, 18, 10, 2', valency: '4' },
+            { num: 91, name: 'ప్రొటాక్టినియం', symbol: 'Pa', mass: 231.04, config: '2, 8, 18, 32, 20, 9, 2', valency: '5' },
+            { num: 92, name: 'యురేనియం', symbol: 'U', mass: 238.03, config: '2, 8, 18, 32, 21, 9, 2', valency: '3, 4, 5, 6' },
+            { num: 93, name: 'నెప్ట్యూనియం', symbol: 'Np', mass: 237, config: '2, 8, 18, 32, 22, 9, 2', valency: '3, 4, 5, 6, 7' },
+            { num: 94, name: 'ప్లూటోనియం', symbol: 'Pu', mass: 244, config: '2, 8, 18, 32, 24, 8, 2', valency: '3, 4, 5, 6' },
+            { num: 95, name: 'అమెరిషియం', symbol: 'Am', mass: 243, config: '2, 8, 18, 32, 25, 8, 2', valency: '2, 3, 4, 5, 6' },
+            { num: 96, name: 'క్యూరియం', symbol: 'Cm', mass: 247, config: '2, 8, 18, 32, 25, 9, 2', valency: '3, 4' },
+            { num: 97, name: 'బెర్కెలియం', symbol: 'Bk', mass: 247, config: '2, 8, 18, 32, 27, 8, 2', valency: '3, 4' },
+            { num: 98, name: 'కాలిఫోర్నియం', symbol: 'Cf', mass: 251, config: '2, 8, 18, 32, 28, 8, 2', valency: '2, 3, 4' },
+            { num: 99, name: 'ఐన్‌స్టీనియం', symbol: 'Es', mass: 252, config: '2, 8, 18, 32, 29, 8, 2', valency: '3' },
+            { num: 100, name: 'ఫెర్మియం', symbol: 'Fm', mass: 257, config: '2, 8, 18, 32, 30, 8, 2', valency: '3' },
+            { num: 101, name: 'మెండలీవియం', symbol: 'Md', mass: 258, config: '2, 8, 18, 32, 31, 8, 2', valency: '3' },
+            { num: 102, name: 'నోబెలియం', symbol: 'No', mass: 259, config: '2, 8, 18, 32, 32, 8, 2', valency: '2, 3' },
+            { num: 103, name: 'లారెన్షియం', symbol: 'Lr', mass: 262, config: '2, 8, 18, 32, 32, 9, 2', valency: '3' },
+            { num: 104, name: 'రుథర్‌ఫోర్డియం', symbol: 'Rf', mass: 267, config: '2, 8, 18, 32, 32, 10, 2', valency: '4' },
+            { num: 105, name: 'డబ్నియం', symbol: 'Db', mass: 268, config: '2, 8, 18, 32, 32, 11, 2', valency: '5' },
+            { num: 106, name: 'సీబోర్గియం', symbol: 'Sg', mass: 271, config: '2, 8, 18, 32, 32, 12, 2', valency: '6' },
+            { num: 107, name: 'బోహ్రియం', symbol: 'Bh', mass: 272, config: '2, 8, 18, 32, 32, 13, 2', valency: '7' },
+            { num: 108, name: 'హాస్సియం', symbol: 'Hs', mass: 270, config: '2, 8, 18, 32, 32, 14, 2', valency: '8' },
+            { num: 109, name: 'మైట్‌నీరియం', symbol: 'Mt', mass: 276, config: '2, 8, 18, 32, 32, 15, 2', valency: '?' },
+            { num: 110, name: 'డార్మ్‌స్టాటియం', symbol: 'Ds', mass: 281, config: '2, 8, 18, 32, 32, 16, 2', valency: '?' },
+            { num: 111, name: 'రోంట్జెనియం', symbol: 'Rg', mass: 280, config: '2, 8, 18, 32, 32, 17, 2', valency: '?' },
+            { num: 112, name: 'కోపర్నీషియం', symbol: 'Cn', mass: 285, config: '2, 8, 18, 32, 32, 18, 2', valency: '2' },
+            { num: 113, name: 'నిహోనియం', symbol: 'Nh', mass: 286, config: '2, 8, 18, 32, 32, 18, 3', valency: '3' },
+            { num: 114, name: 'ఫ్లెరోవియం', symbol: 'Fl', mass: 289, config: '2, 8, 18, 32, 32, 18, 4', valency: '4' },
+            { num: 115, name: 'మాస్కోవియం', symbol: 'Mc', mass: 290, config: '2, 8, 18, 32, 32, 18, 5', valency: '?' },
+            { num: 116, name: 'లివర్మోరియం', symbol: 'Lv', mass: 293, config: '2, 8, 18, 32, 32, 18, 6', valency: '?' },
+            { num: 117, name: 'టెనెసిన్', symbol: 'Ts', mass: 294, config: '2, 8, 18, 32, 32, 18, 7', valency: '?' },
+            { num: 118, name: 'ఒగానెసన్', symbol: 'Og', mass: 294, config: '2, 8, 18, 32, 32, 18, 8', valency: '0' }
+        ];
+
+        const elementsDataEn = [
+            { num: 1, name: 'Hydrogen', symbol: 'H', mass: 1.008, config: '1', valency: '1' },
+            { num: 2, name: 'Helium', symbol: 'He', mass: 4.0026, config: '2', valency: '0' },
+            { num: 3, name: 'Lithium', symbol: 'Li', mass: 6.94, config: '2, 1', valency: '1' },
+            { num: 4, name: 'Beryllium', symbol: 'Be', mass: 9.0122, config: '2, 2', valency: '2' },
+            { num: 5, name: 'Boron', symbol: 'B', mass: 10.81, config: '2, 3', valency: '3' },
+            { num: 6, name: 'Carbon', symbol: 'C', mass: 12.011, config: '2, 4', valency: '4' },
+            { num: 7, name: 'Nitrogen', symbol: 'N', mass: 14.007, config: '2, 5', valency: '3' },
+            { num: 8, name: 'Oxygen', symbol: 'O', mass: 15.999, config: '2, 6', valency: '2' },
+            { num: 9, name: 'Fluorine', symbol: 'F', mass: 18.998, config: '2, 7', valency: '1' },
+            { num: 10, name: 'Neon', symbol: 'Ne', mass: 20.180, config: '2, 8', valency: '0' },
+            { num: 11, name: 'Sodium', symbol: 'Na', mass: 22.990, config: '2, 8, 1', valency: '1' },
+            { num: 12, name: 'Magnesium', symbol: 'Mg', mass: 24.305, config: '2, 8, 2', valency: '2' },
+            { num: 13, name: 'Aluminium', symbol: 'Al', mass: 26.982, config: '2, 8, 3', valency: '3' },
+            { num: 14, name: 'Silicon', symbol: 'Si', mass: 28.085, config: '2, 8, 4', valency: '4' },
+            { num: 15, name: 'Phosphorus', symbol: 'P', mass: 30.974, config: '2, 8, 5', valency: '3, 5' },
+            { num: 16, name: 'Sulfur', symbol: 'S', mass: 32.06, config: '2, 8, 6', valency: '2' },
+            { num: 17, name: 'Chlorine', symbol: 'Cl', mass: 35.45, config: '2, 8, 7', valency: '1' },
+            { num: 18, name: 'Argon', symbol: 'Ar', mass: 39.948, config: '2, 8, 8', valency: '0' },
+            { num: 19, name: 'Potassium', symbol: 'K', mass: 39.098, config: '2, 8, 8, 1', valency: '1' },
+            { num: 20, name: 'Calcium', symbol: 'Ca', mass: 40.078, config: '2, 8, 8, 2', valency: '2' },
+            { num: 21, name: 'Scandium', symbol: 'Sc', mass: 44.956, config: '2, 8, 9, 2', valency: '3' },
+            { num: 22, name: 'Titanium', symbol: 'Ti', mass: 47.867, config: '2, 8, 10, 2', valency: '4' },
+            { num: 23, name: 'Vanadium', symbol: 'V', mass: 50.942, config: '2, 8, 11, 2', valency: '5' },
+            { num: 24, name: 'Chromium', symbol: 'Cr', mass: 51.996, config: '2, 8, 13, 1', valency: '6' },
+            { num: 25, name: 'Manganese', symbol: 'Mn', mass: 54.938, config: '2, 8, 13, 2', valency: '7' },
+            { num: 26, name: 'Iron', symbol: 'Fe', mass: 55.845, config: '2, 8, 14, 2', valency: '2, 3' },
+            { num: 27, name: 'Cobalt', symbol: 'Co', mass: 58.933, config: '2, 8, 15, 2', valency: '2, 3' },
+            { num: 28, name: 'Nickel', symbol: 'Ni', mass: 58.693, config: '2, 8, 16, 2', valency: '2' },
+            { num: 29, name: 'Copper', symbol: 'Cu', mass: 63.546, config: '2, 8, 18, 1', valency: '1, 2' },
+            { num: 30, name: 'Zinc', symbol: 'Zn', mass: 65.38, config: '2, 8, 18, 2', valency: '2' },
+            { num: 31, name: 'Gallium', symbol: 'Ga', mass: 69.723, config: '2, 8, 18, 3', valency: '3' },
+            { num: 32, name: 'Germanium', symbol: 'Ge', mass: 72.630, config: '2, 8, 18, 4', valency: '4' },
+            { num: 33, name: 'Arsenic', symbol: 'As', mass: 74.922, config: '2, 8, 18, 5', valency: '3, 5' },
+            { num: 34, name: 'Selenium', symbol: 'Se', mass: 78.971, config: '2, 8, 18, 6', valency: '2' },
+            { num: 35, name: 'Bromine', symbol: 'Br', mass: 79.904, config: '2, 8, 18, 7', valency: '1' },
+            { num: 36, name: 'Krypton', symbol: 'Kr', mass: 83.798, config: '2, 8, 18, 8', valency: '0' },
+            { num: 37, name: 'Rubidium', symbol: 'Rb', mass: 85.468, config: '2, 8, 18, 8, 1', valency: '1' },
+            { num: 38, name: 'Strontium', symbol: 'Sr', mass: 87.62, config: '2, 8, 18, 8, 2', valency: '2' },
+            { num: 39, name: 'Yttrium', symbol: 'Y', mass: 88.906, config: '2, 8, 18, 9, 2', valency: '3' },
+            { num: 40, name: 'Zirconium', symbol: 'Zr', mass: 91.224, config: '2, 8, 18, 10, 2', valency: '4' },
+            { num: 41, name: 'Niobium', symbol: 'Nb', mass: 92.906, config: '2, 8, 18, 12, 1', valency: '5' },
+            { num: 42, name: 'Molybdenum', symbol: 'Mo', mass: 95.96, config: '2, 8, 18, 13, 1', valency: '6' },
+            { num: 43, name: 'Technetium', symbol: 'Tc', mass: 98, config: '2, 8, 18, 13, 2', valency: '7' },
+            { num: 44, name: 'Ruthenium', symbol: 'Ru', mass: 101.07, config: '2, 8, 18, 15, 1', valency: '8' },
+            { num: 45, name: 'Rhodium', symbol: 'Rh', mass: 102.91, config: '2, 8, 18, 16, 1', valency: '3' },
+            { num: 46, name: 'Palladium', symbol: 'Pd', mass: 106.42, config: '2, 8, 18, 18', valency: '2, 4' },
+            { num: 47, name: 'Silver', symbol: 'Ag', mass: 107.87, config: '2, 8, 18, 18, 1', valency: '1' },
+            { num: 48, name: 'Cadmium', symbol: 'Cd', mass: 112.41, config: '2, 8, 18, 18, 2', valency: '2' },
+            { num: 49, name: 'Indium', symbol: 'In', mass: 114.82, config: '2, 8, 18, 18, 3', valency: '3' },
+            { num: 50, name: 'Tin', symbol: 'Sn', mass: 118.71, config: '2, 8, 18, 18, 4', valency: '2, 4' },
+            { num: 51, name: 'Antimony', symbol: 'Sb', mass: 121.76, config: '2, 8, 18, 18, 5', valency: '3, 5' },
+            { num: 52, name: 'Tellurium', symbol: 'Te', mass: 127.60, config: '2, 8, 18, 18, 6', valency: '2, 4, 6' },
+            { num: 53, name: 'Iodine', symbol: 'I', mass: 126.90, config: '2, 8, 18, 18, 7', valency: '1, 3, 5, 7' },
+            { num: 54, name: 'Xenon', symbol: 'Xe', mass: 131.29, config: '2, 8, 18, 18, 8', valency: '0, 2, 4, 6, 8' },
+            { num: 55, name: 'Cesium', symbol: 'Cs', mass: 132.91, config: '2, 8, 18, 18, 8, 1', valency: '1' },
+            { num: 56, name: 'Barium', symbol: 'Ba', mass: 137.33, config: '2, 8, 18, 18, 8, 2', valency: '2' },
+            { num: 57, name: 'Lanthanum', symbol: 'La', mass: 138.91, config: '2, 8, 18, 18, 9, 2', valency: '3' },
+            { num: 58, name: 'Cerium', symbol: 'Ce', mass: 140.12, config: '2, 8, 18, 19, 9, 2', valency: '3, 4' },
+            { num: 59, name: 'Praseodymium', symbol: 'Pr', mass: 140.91, config: '2, 8, 18, 21, 8, 2', valency: '3' },
+            { num: 60, name: 'Neodymium', symbol: 'Nd', mass: 144.24, config: '2, 8, 18, 22, 8, 2', valency: '3' },
+            { num: 61, name: 'Promethium', symbol: 'Pm', mass: 145, config: '2, 8, 18, 23, 8, 2', valency: '3' },
+            { num: 62, name: 'Samarium', symbol: 'Sm', mass: 150.36, config: '2, 8, 18, 24, 8, 2', valency: '3' },
+            { num: 63, name: 'Europium', symbol: 'Eu', mass: 151.96, config: '2, 8, 18, 25, 8, 2', valency: '2, 3' },
+            { num: 64, name: 'Gadolinium', symbol: 'Gd', mass: 157.25, config: '2, 8, 18, 25, 9, 2', valency: '3' },
+            { num: 65, name: 'Terbium', symbol: 'Tb', mass: 158.93, config: '2, 8, 18, 27, 8, 2', valency: '3' },
+            { num: 66, name: 'Dysprosium', symbol: 'Dy', mass: 162.50, config: '2, 8, 18, 28, 8, 2', valency: '3' },
+            { num: 67, name: 'Holmium', symbol: 'Ho', mass: 164.93, config: '2, 8, 18, 29, 8, 2', valency: '3' },
+            { num: 68, name: 'Erbium', symbol: 'Er', mass: 167.26, config: '2, 8, 18, 30, 8, 2', valency: '3' },
+            { num: 69, name: 'Thulium', symbol: 'Tm', mass: 168.93, config: '2, 8, 18, 31, 8, 2', valency: '3' },
+            { num: 70, name: 'Ytterbium', symbol: 'Yb', mass: 173.05, config: '2, 8, 18, 32, 8, 2', valency: '2, 3' },
+            { num: 71, name: 'Lutetium', symbol: 'Lu', mass: 174.97, config: '2, 8, 18, 32, 9, 2', valency: '3' },
+            { num: 72, name: 'Hafnium', symbol: 'Hf', mass: 178.49, config: '2, 8, 18, 32, 10, 2', valency: '4' },
+            { num: 73, name: 'Tantalum', symbol: 'Ta', mass: 180.95, config: '2, 8, 18, 32, 11, 2', valency: '5' },
+            { num: 74, name: 'Tungsten', symbol: 'W', mass: 183.84, config: '2, 8, 18, 32, 12, 2', valency: '6' },
+            { num: 75, name: 'Rhenium', symbol: 'Re', mass: 186.21, config: '2, 8, 18, 32, 13, 2', valency: '7' },
+            { num: 76, name: 'Osmium', symbol: 'Os', mass: 190.23, config: '2, 8, 18, 32, 14, 2', valency: '8' },
+            { num: 77, name: 'Iridium', symbol: 'Ir', mass: 192.22, config: '2, 8, 18, 32, 15, 2', valency: '3, 4' },
+            { num: 78, name: 'Platinum', symbol: 'Pt', mass: 195.08, config: '2, 8, 18, 32, 17, 1', valency: '2, 4' },
+            { num: 79, name: 'Gold', symbol: 'Au', mass: 196.97, config: '2, 8, 18, 32, 18, 1', valency: '1, 3' },
+            { num: 80, name: 'Mercury', symbol: 'Hg', mass: 200.59, config: '2, 8, 18, 32, 18, 2', valency: '1, 2' },
+            { num: 81, name: 'Thallium', symbol: 'Tl', mass: 204.38, config: '2, 8, 18, 32, 18, 3', valency: '1, 3' },
+            { num: 82, name: 'Lead', symbol: 'Pb', mass: 207.2, config: '2, 8, 18, 32, 18, 4', valency: '2, 4' },
+            { num: 83, name: 'Bismuth', symbol: 'Bi', mass: 208.98, config: '2, 8, 18, 32, 18, 5', valency: '3, 5' },
+            { num: 84, name: 'Polonium', symbol: 'Po', mass: 209, config: '2, 8, 18, 32, 18, 6', valency: '2, 4, 6' },
+            { num: 85, name: 'Astatine', symbol: 'At', mass: 210, config: '2, 8, 18, 32, 18, 7', valency: '1, 3, 5, 7' },
+            { num: 86, name: 'Radon', symbol: 'Rn', mass: 222, config: '2, 8, 18, 32, 18, 8', valency: '0' },
+            { num: 87, name: 'Francium', symbol: 'Fr', mass: 223, config: '2, 8, 18, 32, 18, 8, 1', valency: '1' },
+            { num: 88, name: 'Radium', symbol: 'Ra', mass: 226, config: '2, 8, 18, 32, 18, 8, 2', valency: '2' },
+            { num: 89, name: 'Actinium', symbol: 'Ac', mass: 227, config: '2, 8, 18, 32, 18, 9, 2', valency: '3' },
+            { num: 90, name: 'Thorium', symbol: 'Th', mass: 232.04, config: '2, 8, 18, 32, 18, 10, 2', valency: '4' },
+            { num: 91, name: 'Protactinium', symbol: 'Pa', mass: 231.04, config: '2, 8, 18, 32, 20, 9, 2', valency: '5' },
+            { num: 92, name: 'Uranium', symbol: 'U', mass: 238.03, config: '2, 8, 18, 32, 21, 9, 2', valency: '3, 4, 5, 6' },
+            { num: 93, name: 'Neptunium', symbol: 'Np', mass: 237, config: '2, 8, 18, 32, 22, 9, 2', valency: '3, 4, 5, 6, 7' },
+            { num: 94, name: 'Plutonium', symbol: 'Pu', mass: 244, config: '2, 8, 18, 32, 24, 8, 2', valency: '3, 4, 5, 6' },
+            { num: 95, name: 'Americium', symbol: 'Am', mass: 243, config: '2, 8, 18, 32, 25, 8, 2', valency: '2, 3, 4, 5, 6' },
+            { num: 96, name: 'Curium', symbol: 'Cm', mass: 247, config: '2, 8, 18, 32, 25, 9, 2', valency: '3, 4' },
+            { num: 97, name: 'Berkelium', symbol: 'Bk', mass: 247, config: '2, 8, 18, 32, 27, 8, 2', valency: '3, 4' },
+            { num: 98, name: 'Californium', symbol: 'Cf', mass: 251, config: '2, 8, 18, 32, 28, 8, 2', valency: '2, 3, 4' },
+            { num: 99, name: 'Einsteinium', symbol: 'Es', mass: 252, config: '2, 8, 18, 32, 29, 8, 2', valency: '3' },
+            { num: 100, name: 'Fermium', symbol: 'Fm', mass: 257, config: '2, 8, 18, 32, 30, 8, 2', valency: '3' },
+            { num: 101, name: 'Mendelevium', symbol: 'Md', mass: 258, config: '2, 8, 18, 32, 31, 8, 2', valency: '3' },
+            { num: 102, name: 'Nobelium', symbol: 'No', mass: 259, config: '2, 8, 18, 32, 32, 8, 2', valency: '2, 3' },
+            { num: 103, name: 'Lawrencium', symbol: 'Lr', mass: 262, config: '2, 8, 18, 32, 32, 9, 2', valency: '3' },
+            { num: 104, name: 'Rutherfordium', symbol: 'Rf', mass: 267, config: '2, 8, 18, 32, 32, 10, 2', valency: '4' },
+            { num: 105, name: 'Dubnium', symbol: 'Db', mass: 268, config: '2, 8, 18, 32, 32, 11, 2', valency: '5' },
+            { num: 106, name: 'Seaborgium', symbol: 'Sg', mass: 271, config: '2, 8, 18, 32, 32, 12, 2', valency: '6' },
+            { num: 107, name: 'Bohrium', symbol: 'Bh', mass: 272, config: '2, 8, 18, 32, 32, 13, 2', valency: '7' },
+            { num: 108, name: 'Hassium', symbol: 'Hs', mass: 270, config: '2, 8, 18, 32, 32, 14, 2', valency: '8' },
+            { num: 109, name: 'Meitnerium', symbol: 'Mt', mass: 276, config: '2, 8, 18, 32, 32, 15, 2', valency: '?' },
+            { num: 110, name: 'Darmstadtium', symbol: 'Ds', mass: 281, config: '2, 8, 18, 32, 32, 16, 2', valency: '?' },
+            { num: 111, name: 'Roentgenium', symbol: 'Rg', mass: 280, config: '2, 8, 18, 32, 32, 17, 2', valency: '?' },
+            { num: 112, name: 'Copernicium', symbol: 'Cn', mass: 285, config: '2, 8, 18, 32, 32, 18, 2', valency: '2' },
+            { num: 113, name: 'Nihonium', symbol: 'Nh', mass: 286, config: '2, 8, 18, 32, 32, 18, 3', valency: '3' },
+            { num: 114, name: 'Flerovium', symbol: 'Fl', mass: 289, config: '2, 8, 18, 32, 32, 18, 4', valency: '4' },
+            { num: 115, name: 'Moscovium', symbol: 'Mc', mass: 290, config: '2, 8, 18, 32, 32, 18, 5', valency: '?' },
+            { num: 116, name: 'Livermorium', symbol: 'Lv', mass: 293, config: '2, 8, 18, 32, 32, 18, 6', valency: '?' },
+            { num: 117, name: 'Tennessine', symbol: 'Ts', mass: 294, config: '2, 8, 18, 32, 32, 18, 7', valency: '?' },
+            { num: 118, name: 'Oganesson', symbol: 'Og', mass: 294, config: '2, 8, 18, 32, 32, 18, 8', valency: '0' }
+        ];
+
+        const uiText = {
+            te: {
+                title: '🧪 ఆవర్తన పట్టిక',
+                selectLabel: 'ఒక మూలకాన్ని ఎంచుకోండి',
+                toggleButton: 'Switch to English',
+                details: {
+                    name: 'మూలకం పేరు',
+                    symbol: 'సంకేతం',
+                    atomicNumber: 'పరమాణు సంఖ్య',
+                    electronConfig: 'ఎలక్ట్రాన్ విన్యాసం',
+                    valency: 'సంయోజకత',
+                    atomicMass: 'పరమాణు ద్రవ్యరాశి'
+                }
+            },
+            en: {
+                title: '🧪 Periodic Table',
+                selectLabel: 'Select an Element',
+                toggleButton: 'తెలుగుకు మారండి',
+                details: {
+                    name: 'Element Name',
+                    symbol: 'Symbol',
+                    atomicNumber: 'Atomic Number',
+                    electronConfig: 'Electron Configuration',
+                    valency: 'Valency',
+                    atomicMass: 'Atomic Mass'
+                }
+            }
+        };
+
+        const select = document.getElementById('element-select');
+
+        function populateDropdown() {
+            const currentData = (currentLanguage === 'te') ? elementsDataTe : elementsDataEn;
+            select.innerHTML = '';
+            currentData.forEach(element => {
+                const option = document.createElement('option');
+                option.value = element.num;
+                option.textContent = `${element.num}. ${element.name} (${element.symbol})`;
+                select.appendChild(option);
+            });
+        }
+
+        function updateUIText() {
+            const langTexts = uiText[currentLanguage];
+            document.getElementById('main-title').textContent = langTexts.title;
+            document.getElementById('select-label').textContent = langTexts.selectLabel;
+            document.getElementById('lang-toggle').textContent = langTexts.toggleButton;
+        }
+        
+        function displayElementDetails() {
+            const selectedNum = parseInt(select.value);
+            const currentData = (currentLanguage === 'te') ? elementsDataTe : elementsDataEn;
+            const element = currentData.find(el => el.num === selectedNum);
+            const detailsDiv = document.getElementById('element-details');
+            const labels = uiText[currentLanguage].details;
+
+            if (element) {
+                detailsDiv.innerHTML = `
+                    <h2>${element.name} (${element.symbol})</h2>
+                    <div class="detail-item">
+                        <span>${labels.name}</span>
+                        <span>${element.name}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>${labels.symbol}</span>
+                        <span>${element.symbol}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>${labels.atomicNumber}</span>
+                        <span>${element.num}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>${labels.electronConfig}</span>
+                        <span>${element.config}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>${labels.valency}</span>
+                        <span>${element.valency || '?'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>${labels.atomicMass}</span>
+                        <span>${element.mass}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleLanguage() {
+            const selectedValue = select.value;
+            currentLanguage = (currentLanguage === 'te') ? 'en' : 'te';
+            updateUIText();
+            populateDropdown();
+            select.value = selectedValue; // Re-select the same element
+            displayElementDetails();
+        }
+        
+        window.onload = function() {
+            updateUIText();
+            populateDropdown();
+            displayElementDetails();
+        };
+
+    </script>
+</body>
+</html>
